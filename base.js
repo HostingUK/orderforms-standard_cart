@@ -353,7 +353,7 @@ jQuery(document).ready(function(){
                         .find('span.extension').html('.' + tld).end()
                         .find('button').attr('data-domain', domain.idnDomainName).end()
                         .find('span.price').html(pricing[Object.keys(pricing)[0]].register).end();
-                    if (suggestionCount <= 10) {
+                    if (suggestionCount <= 5) {
                         newSuggestion.removeClass('hidden');
                     }
                     suggestionCount++;
