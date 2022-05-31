@@ -93,35 +93,25 @@ jQuery(document).ready(function(){
     jQuery("#frmConfigureProduct").submit(function(e) {
         e.preventDefault();
 
-        var button = jQuery('#btnCompleteProductConfig'),
-            btnOriginalText = jQuery(button).html(),
-            postUrl = whmcsBaseUrl + '/cart.php',
-            postData = 'a=confproduct&' + jQuery("#frmConfigureProduct").serialize();
+        var button = jQuery('#btnCompleteProductConfig');
 
+        var btnOriginalText = jQuery(button).html();
         jQuery(button).find('i').removeClass('fa-arrow-circle-right').addClass('fa-spinner fa-spin');
-        displayRecommendations(
-            postUrl,
-            'addproductajax=1&' + postData,
-            false
-        ).done(function() {
-            WHMCS.http.jqClient.post(
-                postUrl,
-                'ajax=1&' + postData,
-                function(data) {
-                    if (data) {
-                        jQuery("#btnCompleteProductConfig").html(btnOriginalText);
-                        jQuery("#containerProductValidationErrorsList").html(data);
-                        jQuery("#containerProductValidationErrors").show();
-                        // scroll to error container if below it
-                        if (jQuery(window).scrollTop() > jQuery("#containerProductValidationErrors").offset().top) {
-                            jQuery('html, body').scrollTop(jQuery("#containerProductValidationErrors").offset().top - 15);
-                        }
-                    } else {
-                        window.location = whmcsBaseUrl + '/cart.php?a=confdomains';
+        WHMCS.http.jqClient.post(whmcsBaseUrl + '/cart.php', 'ajax=1&a=confproduct&' + jQuery("#frmConfigureProduct").serialize(),
+            function(data) {
+                if (data) {
+                    jQuery("#btnCompleteProductConfig").html(btnOriginalText);
+                    jQuery("#containerProductValidationErrorsList").html(data);
+                    jQuery("#containerProductValidationErrors").show();
+                    // scroll to error container if below it
+                    if (jQuery(window).scrollTop() > jQuery("#containerProductValidationErrors").offset().top) {
+                        jQuery('html, body').scrollTop(jQuery("#containerProductValidationErrors").offset().top - 15);
                     }
+                } else {
+                    window.location = whmcsBaseUrl + '/cart.php?a=confdomains';
                 }
-            );
-        });
+            }
+        );
     });
 
     jQuery("#productConfigurableOptions").on('ifChecked', 'input', function() {
@@ -565,13 +555,7 @@ jQuery(document).ready(function(){
                 }
                 jQuery.each(data.result, function(index, result) {
                     if (result.status === true) {
-                        displayRecommendations(
-                            whmcsBaseUrl + '/cart.php',
-                            'addproductajax=1&a=confproduct&i=' + result.num,
-                            false
-                        ).done(function() {
-                            window.location = whmcsBaseUrl + '/cart.php?a=confproduct&i=' + result.num;
-                        });
+                        window.location = whmcsBaseUrl + '/cart.php?a=confproduct&i=' + result.num;
                     } else {
                         jQuery('.domain-lookup-primary-loader').hide();
                         if (typeof result === 'string') {
@@ -594,24 +578,14 @@ jQuery(document).ready(function(){
 
     jQuery('#frmProductDomainSelections').on('submit', function(e) {
         var idnLanguage = jQuery('#idnLanguageSelector'),
-            idnLanguageInput = idnLanguage.find('select'),
-            form = jQuery(this);
+            idnLanguageInput = idnLanguage.find('select');
 
         if (idnLanguage.is(':visible') && !idnLanguageInput.val()) {
             e.preventDefault();
             idnLanguageInput.showInputError();
             return false;
         }
-
-        e.preventDefault();
-        displayRecommendations(
-            form.attr('action'),
-            'addproductajax=1&' + form.serialize(),
-            false
-        ).done(function() {
-            form.unbind().submit();
-            form.submit();
-        });
+        return true;
     });
 
     jQuery("#btnAlreadyRegistered").click(function() {
@@ -1248,7 +1222,7 @@ jQuery(document).ready(function(){
                     newSuggestion.find('button.btn-add-to-cart').attr('data-domain', domain.domainName).end()
                         .find('span.price').html(pricing[Object.keys(pricing)[0]].register);
                 }
-                if (suggestionCount <= 10) {
+                if (suggestionCount <= 5) {
                     newSuggestion.show();
                 }
                 suggestionCount++;
@@ -1763,16 +1737,10 @@ function removeItem(type, num) {
 }
 
 function updateConfigurableOptions(i, billingCycle) {
+
     WHMCS.http.jqClient.post(whmcsBaseUrl + '/cart.php', 'a=cyclechange&ajax=1&i='+i+'&billingcycle='+billingCycle,
         function(data) {
-            var co = jQuery('#productConfigurableOptions'),
-                add = jQuery('#productAddonsContainer');
-            if (co.length) {
-                co.html(jQuery(data).find('#productConfigurableOptions').html());
-            }
-            if (add.length) {
-                add.html(jQuery(data).find('#productAddonsContainer').html());
-            }
+            jQuery("#productConfigurableOptions").html(jQuery(data).find('#productConfigurableOptions').html());
             jQuery('input').iCheck({
                 inheritID: true,
                 checkboxClass: 'icheckbox_square-blue',
@@ -1782,6 +1750,7 @@ function updateConfigurableOptions(i, billingCycle) {
         }
     );
     recalctotals();
+
 }
 
 function recalctotals() {
