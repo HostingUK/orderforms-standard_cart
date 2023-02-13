@@ -8,7 +8,6 @@ var _localLang = {
 </script>
 
 <div id="order-standard_cart">
-
     <div class="row">
         <div class="cart-sidebar">
             {include file="orderforms/standard_cart/sidebar-categories.tpl"}
@@ -40,8 +39,18 @@ var _localLang = {
                             <ul id="containerProductValidationErrorsList"></ul>
                         </div>
 
+                        {if $productinfo.group_name eq "Microsoft 365" || $productinfo.group_name eq "Microsoft NCE"}
+
+                            {assign var="style" value='style="display: none;"'}
+
+                        {else}
+
+                            {assign var="style" value=""}
+
+                        {/if}
+
                         {if $pricing.type eq "recurring"}
-                            <div class="field-container">
+                            <div class="field-container" {$style}>
                                 <div class="form-group">
                                     <label for="inputBillingcycle">{$LANG.cartchoosecycle}</label>
                                     <br>
